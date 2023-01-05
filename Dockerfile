@@ -1,4 +1,4 @@
-ARG IMAGE_BUILD_GO=golang:1.17-buster
+ARG IMAGE_BUILD_GO=golang:1.18-buster
 ARG IMAGE_BASE=gcr.io/distroless/static-debian10
 
 FROM ${IMAGE_BUILD_GO} AS gobase
