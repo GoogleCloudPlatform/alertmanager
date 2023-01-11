@@ -1,16 +1,16 @@
 go:
     # Whenever the Go version is updated here, .travis.yml and
     # .circle/config.yml should also be updated.
-    version: 1.17
+    version: 1.18
 repository:
-    path: github.com/prometheus/alertmanager
+    path: github.com/GoogleCloudPlatform/alertmanager
 build:
     binaries:
         - name: alertmanager
           path: ./cmd/alertmanager
         - name: amtool
           path: ./cmd/amtool
-    flags: -a -tags netgo
+    flags: -a -tags netgo -mod=vendor
     ldflags: |
         -X github.com/prometheus/common/version.Version={{.Version}}
         -X github.com/prometheus/common/version.Revision={{.Revision}}
