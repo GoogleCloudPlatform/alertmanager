@@ -3,7 +3,7 @@ go:
     # .circle/config.yml should also be updated.
     version: 1.19
 repository:
-    path: github.com/prometheus/alertmanager
+    path: github.com/GoogleCloudPlatform/alertmanager
 build:
     binaries:
         - name: alertmanager

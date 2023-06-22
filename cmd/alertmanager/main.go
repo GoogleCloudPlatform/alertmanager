@@ -28,6 +28,7 @@ import (
 	"syscall"
 	"time"
 
+	exportsetup "github.com/GoogleCloudPlatform/prometheus-engine/pkg/export/setup"
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/pkg/errors"
@@ -233,9 +234,19 @@ func run() int {
 
 	kingpin.Version(version.Print("alertmanager"))
 	kingpin.CommandLine.GetFlag("help").Short('h')
-	kingpin.Parse()
+	// Read any other flags from EXTRA_ARGS.
+	logger := log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
+	if extraArgs, err := exportsetup.ExtraArgs(); err != nil {
+		level.Error(logger).Log("msg", "Error parsing commandline arguments", "err", err)
+		kingpin.CommandLine.Usage(os.Args[1:])
+		os.Exit(2)
+	} else if _, err := kingpin.CommandLine.Parse(append(os.Args[1:], extraArgs...)); err != nil {
+		level.Error(logger).Log("msg", "Error parsing commandline arguments", "err", err)
+		kingpin.CommandLine.Usage(os.Args[1:])
+		os.Exit(2)
+	}
 
-	logger := promlog.New(&promlogConfig)
+	logger = promlog.New(&promlogConfig)
 
 	level.Info(logger).Log("msg", "Starting Alertmanager", "version", version.Info())
 	level.Info(logger).Log("build_context", version.BuildContext())
