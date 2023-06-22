@@ -1,16 +1,25 @@
-ARG ARCH="amd64"
-ARG OS="linux"
-FROM quay.io/prometheus/busybox-${OS}-${ARCH}:latest
-LABEL maintainer="The Prometheus Authors <prometheus-developers@googlegroups.com>"
+ARG IMAGE_BUILD_GO=golang:1.22.4@sha256:c2010b9c2342431a24a2e64e33d9eb2e484af49e72c820e200d332d214d5e61f as buildbase
+ARG IMAGE_BASE=gke.gcr.io/gke-distroless/libc@sha256:4f834e207f2721977094aeec4c9daee7032c5daec2083c0be97760f4306e4f88
 
-ARG ARCH="amd64"
-ARG OS="linux"
-COPY .build/${OS}-${ARCH}/amtool       /bin/amtool
-COPY .build/${OS}-${ARCH}/alertmanager /bin/alertmanager
-COPY examples/ha/alertmanager.yml      /etc/alertmanager/alertmanager.yml
+FROM ${IMAGE_BUILD_GO} AS gobase
+WORKDIR /app
+COPY . ./
+RUN mkdir /etc/alertmanager
+RUN mkdir /alertmanager
+RUN CGO_ENABLED=1 GOEXPERIMENT=boringcrypto \
+    go build \
+    -tags boring \
+    -mod=vendor \
+    -ldflags="-X github.com/prometheus/common/version.Version=$(cat VERSION) \
+    -X github.com/prometheus/common/version.BuildDate=$(date --iso-8601=seconds)" \
+    ./cmd/alertmanager
 
-RUN mkdir -p /alertmanager && \
-    chown -R nobody:nobody etc/alertmanager /alertmanager
+FROM ${IMAGE_BASE}
+COPY --from=gobase /app/alertmanager /bin/alertmanager
+COPY --from=gobase --chown=nobody:nobody /etc/alertmanager /etc/alertmanager
+COPY --from=gobase --chown=nobody:nobody /alertmanager /alertmanager
+COPY LICENSE LICENSE
+COPY NOTICE NOTICE
 
 USER       nobody
 EXPOSE     9093
