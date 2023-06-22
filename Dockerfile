@@ -1,16 +1,16 @@
-ARG ARCH="amd64"
-ARG OS="linux"
-FROM quay.io/prometheus/busybox-${OS}-${ARCH}:latest
-LABEL maintainer="The Prometheus Authors <prometheus-developers@googlegroups.com>"
+ARG IMAGE_BUILD_GO=golang:1.20-bullseye
+ARG IMAGE_BASE=gcr.io/distroless/static-debian11
 
-ARG ARCH="amd64"
-ARG OS="linux"
-COPY .build/${OS}-${ARCH}/amtool       /bin/amtool
-COPY .build/${OS}-${ARCH}/alertmanager /bin/alertmanager
-COPY examples/ha/alertmanager.yml      /etc/alertmanager/alertmanager.yml
+FROM ${IMAGE_BUILD_GO} AS gobase
+WORKDIR /app
+COPY . ./
+RUN make build
 
-RUN mkdir -p /alertmanager && \
-    chown -R nobody:nobody etc/alertmanager /alertmanager
+FROM ${IMAGE_BASE}
+COPY --from=gobase /app/alertmanager /bin/alertmanager
+COPY --from=gobase /app/amtool /bin/amtool
+COPY LICENSE LICENSE
+COPY NOTICE NOTICE
 
 USER       nobody
 EXPOSE     9093
