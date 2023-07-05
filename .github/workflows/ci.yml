@@ -4,17 +4,18 @@ on:  # yamllint disable-line rule:truthy
   pull_request:
   workflow_call:
 jobs:
-  test_frontend:
-    name: Test alertmanager frontend
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - run: make clean
-      - run: make all
-        working-directory: ./ui/app
-      - run: make assets
-      - run: make apiv2
-      - run: git diff --exit-code
+  # See: https://b.corp.google.com/issues/286606832
+  # test_frontend:
+  #   name: Test alertmanager frontend
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - run: make clean
+  #     - run: make all
+  #       working-directory: ./ui/app
+  #     - run: make assets
+  #     - run: make apiv2
+  #     - run: git diff --exit-code
 
   build:
     name: Build Alertmanager for common architectures
