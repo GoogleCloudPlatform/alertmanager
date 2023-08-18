@@ -1,5 +1,5 @@
-ARG IMAGE_BUILD_GO=golang:1.20-buster
-ARG IMAGE_BASE=gcr.io/distroless/static-debian10
+ARG IMAGE_BUILD_GO=golang:1.20-bookworm
+ARG IMAGE_BASE=gcr.io/distroless/static-debian12
 
 FROM ${IMAGE_BUILD_GO} AS gobase
 WORKDIR /app
