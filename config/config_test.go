@@ -23,6 +23,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	commoncfg "github.com/prometheus/common/config"
 	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/require"
@@ -1274,6 +1276,129 @@ func TestNilRegexp(t *testing.T) {
 			_, err = LoadFile(tc.file)
 			require.Error(t, err)
 			require.Contains(t, err.Error(), tc.errMsg)
+		})
+	}
+}
+
+func TestInvalidGoogleCloudExternalURL(t *testing.T) {
+	in := `
+route:
+    receiver: team-X
+    repeat_interval: 3h
+
+receivers:
+  - name: 'team-X'
+
+google_cloud:
+    external_url: abc123
+`
+	_, err := Load(in)
+
+	expected := "unsupported scheme \"\" for URL"
+
+	if err == nil {
+		t.Fatalf("no error returned, expected:\n%q", expected)
+	}
+	if err.Error() != expected {
+		t.Errorf("\nexpected:\n%q\ngot:\n%q", expected, err.Error())
+	}
+}
+
+func TestGoogleCloudExternalURL(t *testing.T) {
+	in := `
+route:
+    receiver: team-X
+    repeat_interval: 3h
+
+receivers:
+  - name: 'team-X'
+
+google_cloud:
+    external_url: https://example.com/foo/
+`
+	actual, err := Load(in)
+	if err != nil {
+		t.Fatalf("no error expected, returned:\n%q", err)
+	}
+	global := DefaultGlobalConfig()
+	repeatInterval := model.Duration(3 * time.Hour)
+	c := Config{
+		Global: &global,
+		Route: &Route{
+			Receiver:       "team-X",
+			RepeatInterval: &repeatInterval,
+		},
+		Receivers: []Receiver{
+			{
+				Name: "team-X",
+			},
+		},
+		GoogleCloud: GoogleCloudConfig{
+			ExternalURL: mustParseURL("https://example.com/foo"),
+		},
+	}
+	actual.original = ""
+	if diff := cmp.Diff(&c, actual, cmpopts.IgnoreUnexported(Config{}, commoncfg.ProxyConfig{})); diff != "" {
+		t.Errorf("returned unexpected config (-want, +got): %s", diff)
+	}
+}
+
+func TestExternalURLNormalize(t *testing.T) {
+	testCases := []struct {
+		desc   string
+		input  string
+		output string
+		err    string
+	}{
+		{
+			desc:   "unchanged root",
+			input:  "https://example.com",
+			output: "https://example.com",
+		},
+		{
+			desc:   "unchanged path",
+			input:  "https://example.com/foo",
+			output: "https://example.com/foo",
+		},
+		{
+			desc:   "unchanged query",
+			input:  "https://example.com/foo?q=bar",
+			output: "https://example.com/foo?q=bar",
+		},
+		{
+			desc:   "no trailing path slash",
+			input:  "https://example.com/foo/",
+			output: "https://example.com/foo",
+		},
+		{
+			desc:   "no trailing root slash",
+			input:  "https://example.com/",
+			output: "https://example.com",
+		},
+		{
+			desc:  "unsupported scheme",
+			input: "ws://example.com",
+			err:   "\"ws://example.com\": invalid \"ws\" scheme, only 'http' and 'https' are supported",
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			url, err := url.Parse(tc.input)
+			if err != nil {
+				t.Fatalf("unable to parse URL: %s", tc.input)
+			}
+			err = ExternalURLNormalize(url)
+			if err != nil {
+				if tc.err == "" {
+					t.Fatalf("unexpected error: %s", err)
+				} else if err.Error() != tc.err {
+					t.Errorf("\nexpected error:\n%v\ngot:\n%v", tc.err, err.Error())
+				}
+				return
+			} else if tc.err != "" {
+				t.Fatalf("no error returned, expected:\n%q", tc.err)
+			}
+			require.Equal(t, tc.output, url.String())
 		})
 	}
 }

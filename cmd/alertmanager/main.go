@@ -387,7 +387,11 @@ func run() int {
 		if err != nil {
 			return fmt.Errorf("failed to parse templates: %w", err)
 		}
-		tmpl.ExternalURL = amURL
+		if externalURL := conf.GoogleCloud.ExternalURL; externalURL != nil {
+			tmpl.ExternalURL = externalURL.URL
+		} else {
+			tmpl.ExternalURL = amURL
+		}
 
 		// Build the routing tree and record which receivers are used.
 		routes := dispatch.NewRoute(conf.Route, nil)
@@ -587,15 +591,9 @@ func extURL(logger log.Logger, hostnamef func() (string, error), listen, externa
 	if err != nil {
 		return nil, err
 	}
-	if u.Scheme != "http" && u.Scheme != "https" {
-		return nil, fmt.Errorf("%q: invalid %q scheme, only 'http' and 'https' are supported", u.String(), u.Scheme)
+	if err := config.ExternalURLNormalize(u); err != nil {
+		return nil, err
 	}
-
-	ppref := strings.TrimRight(u.Path, "/")
-	if ppref != "" && !strings.HasPrefix(ppref, "/") {
-		ppref = "/" + ppref
-	}
-	u.Path = ppref
 
 	return u, nil
 }

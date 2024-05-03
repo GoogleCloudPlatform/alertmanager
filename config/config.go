@@ -308,6 +308,8 @@ type Config struct {
 	MuteTimeIntervals []MuteTimeInterval `yaml:"mute_time_intervals,omitempty" json:"mute_time_intervals,omitempty"`
 	TimeIntervals     []TimeInterval     `yaml:"time_intervals,omitempty" json:"time_intervals,omitempty"`
 
+	GoogleCloud GoogleCloudConfig `yaml:"google_cloud,omitempty" json:"google_cloud,omitempty"`
+
 	// original is the input from which the config was parsed.
 	original string
 }
@@ -585,7 +587,29 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		tiNames[mt.Name] = struct{}{}
 	}
 
+	if c.GoogleCloud.ExternalURL != nil {
+		if err := ExternalURLNormalize(c.GoogleCloud.ExternalURL.URL); err != nil {
+			return err
+		}
+	}
+
 	return checkTimeInterval(c.Route, tiNames)
+}
+
+// ExternalURLNormalize normalizes the external URL, validating the scheme
+// and ensuring there's no trailing slash.
+func ExternalURLNormalize(u *url.URL) error {
+	if u.Scheme != "http" && u.Scheme != "https" {
+		return fmt.Errorf("%q: invalid %q scheme, only 'http' and 'https' are supported", u.String(), u.Scheme)
+	}
+
+	ppref := strings.TrimRight(u.Path, "/")
+	if ppref != "" && !strings.HasPrefix(ppref, "/") {
+		ppref = "/" + ppref
+	}
+	u.Path = ppref
+
+	return nil
 }
 
 // checkReceiver returns an error if a node in the routing tree
@@ -765,6 +789,10 @@ type GlobalConfig struct {
 	VictorOpsAPIKeyFile  string     `yaml:"victorops_api_key_file,omitempty" json:"victorops_api_key_file,omitempty"`
 	TelegramAPIUrl       *URL       `yaml:"telegram_api_url,omitempty" json:"telegram_api_url,omitempty"`
 	WebexAPIURL          *URL       `yaml:"webex_api_url,omitempty" json:"webex_api_url,omitempty"`
+}
+
+type GoogleCloudConfig struct {
+	ExternalURL *URL `yaml:"external_url,omitempty" json:"external_url,omitempty"`
 }
 
 // UnmarshalYAML implements the yaml.Unmarshaler interface for GlobalConfig.
