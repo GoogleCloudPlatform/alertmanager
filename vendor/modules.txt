@@ -324,64 +324,6 @@ github.com/pkg/errors
 # github.com/pmezard/go-difflib v1.0.0
 ## explicit
 github.com/pmezard/go-difflib/difflib
-# github.com/prometheus/alertmanager v0.25.1
-## explicit; go 1.18
-github.com/prometheus/alertmanager/api
-github.com/prometheus/alertmanager/api/metrics
-github.com/prometheus/alertmanager/api/v1
-github.com/prometheus/alertmanager/api/v2
-github.com/prometheus/alertmanager/api/v2/client
-github.com/prometheus/alertmanager/api/v2/client/alert
-github.com/prometheus/alertmanager/api/v2/client/alertgroup
-github.com/prometheus/alertmanager/api/v2/client/general
-github.com/prometheus/alertmanager/api/v2/client/receiver
-github.com/prometheus/alertmanager/api/v2/client/silence
-github.com/prometheus/alertmanager/api/v2/models
-github.com/prometheus/alertmanager/api/v2/restapi
-github.com/prometheus/alertmanager/api/v2/restapi/operations
-github.com/prometheus/alertmanager/api/v2/restapi/operations/alert
-github.com/prometheus/alertmanager/api/v2/restapi/operations/alertgroup
-github.com/prometheus/alertmanager/api/v2/restapi/operations/general
-github.com/prometheus/alertmanager/api/v2/restapi/operations/receiver
-github.com/prometheus/alertmanager/api/v2/restapi/operations/silence
-github.com/prometheus/alertmanager/asset
-github.com/prometheus/alertmanager/cli
-github.com/prometheus/alertmanager/cli/config
-github.com/prometheus/alertmanager/cli/format
-github.com/prometheus/alertmanager/cluster
-github.com/prometheus/alertmanager/cluster/clusterpb
-github.com/prometheus/alertmanager/config
-github.com/prometheus/alertmanager/dispatch
-github.com/prometheus/alertmanager/inhibit
-github.com/prometheus/alertmanager/nflog
-github.com/prometheus/alertmanager/nflog/nflogpb
-github.com/prometheus/alertmanager/notify
-github.com/prometheus/alertmanager/notify/discord
-github.com/prometheus/alertmanager/notify/email
-github.com/prometheus/alertmanager/notify/opsgenie
-github.com/prometheus/alertmanager/notify/pagerduty
-github.com/prometheus/alertmanager/notify/pushover
-github.com/prometheus/alertmanager/notify/slack
-github.com/prometheus/alertmanager/notify/sns
-github.com/prometheus/alertmanager/notify/telegram
-github.com/prometheus/alertmanager/notify/test
-github.com/prometheus/alertmanager/notify/victorops
-github.com/prometheus/alertmanager/notify/webex
-github.com/prometheus/alertmanager/notify/webhook
-github.com/prometheus/alertmanager/notify/wechat
-github.com/prometheus/alertmanager/pkg/labels
-github.com/prometheus/alertmanager/provider
-github.com/prometheus/alertmanager/provider/mem
-github.com/prometheus/alertmanager/silence
-github.com/prometheus/alertmanager/silence/silencepb
-github.com/prometheus/alertmanager/store
-github.com/prometheus/alertmanager/template
-github.com/prometheus/alertmanager/test/cli
-github.com/prometheus/alertmanager/test/with_api_v1
-github.com/prometheus/alertmanager/test/with_api_v2
-github.com/prometheus/alertmanager/timeinterval
-github.com/prometheus/alertmanager/types
-github.com/prometheus/alertmanager/ui
 # github.com/prometheus/client_golang v1.14.0
 ## explicit; go 1.17
 github.com/prometheus/client_golang/api
