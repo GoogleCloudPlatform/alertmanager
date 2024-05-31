@@ -1,4 +1,4 @@
-ARG IMAGE_BUILD_GO=google-go.pkg.dev/golang:1.20.14@sha256:6f86d8a81ff191bee8d3ff8b4c193889560b4ca15df373d5084953c5c860190f
+ARG IMAGE_BUILD_GO=golang:1.20.14@sha256:8f9af7094d0cb27cc783c697ac5ba25efdc4da35f8526db21f7aebb0b0b4f18a
 ARG IMAGE_BASE=gke.gcr.io/gke-distroless/libc@sha256:4f834e207f2721977094aeec4c9daee7032c5daec2083c0be97760f4306e4f88
 
 FROM ${IMAGE_BUILD_GO} AS gobase
