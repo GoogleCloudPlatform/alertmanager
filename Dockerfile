@@ -1,7 +1,4 @@
-ARG IMAGE_BUILD_GO=golang:1.22.4@sha256:c2010b9c2342431a24a2e64e33d9eb2e484af49e72c820e200d332d214d5e61f as buildbase
-ARG IMAGE_BASE=gke.gcr.io/gke-distroless/libc@sha256:4f834e207f2721977094aeec4c9daee7032c5daec2083c0be97760f4306e4f88
-
-FROM ${IMAGE_BUILD_GO} AS gobase
+FROM golang:1.23.1@sha256:4a3c2bcd243d3dbb7b15237eecb0792db3614900037998c2cd6a579c46888c1e AS gobase
 WORKDIR /app
 COPY . ./
 RUN mkdir /etc/alertmanager
@@ -14,7 +11,7 @@ RUN CGO_ENABLED=1 GOEXPERIMENT=boringcrypto \
     -X github.com/prometheus/common/version.BuildDate=$(date --iso-8601=seconds)" \
     ./cmd/alertmanager
 
-FROM ${IMAGE_BASE}
+FROM gke.gcr.io/gke-distroless/libc:gke_distroless_20240907.00_p0@sha256:2cdd63fbfb7bc7482f28328494c8cd6783eba0d4c1007c164a9deee3656b618b
 COPY --from=gobase /app/alertmanager /bin/alertmanager
 COPY --from=gobase --chown=nobody:nobody /etc/alertmanager /etc/alertmanager
 COPY --from=gobase --chown=nobody:nobody /alertmanager /alertmanager
