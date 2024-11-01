@@ -1,5 +1,5 @@
 # TODO(bwplotka): Move to 1.23 once ARM QEMU building is fixed https://github.com/golang/go/issues/68976
-FROM golang:1.22.7@sha256:4594271250150c1a322ed749abfd218e1a8c6eb1ade90872e325a664412e2037 AS gobase
+FROM golang:1.23.2@sha256:ad5c126b5cf501a8caef751a243bb717ec204ab1aa56dc41dc11be089fafcb4f AS gobase
 WORKDIR /app
 COPY . ./
 RUN mkdir /etc/alertmanager
