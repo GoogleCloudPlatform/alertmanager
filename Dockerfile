@@ -13,9 +13,17 @@ RUN CGO_ENABLED=1 GOEXPERIMENT=boringcrypto \
     -ldflags="-X github.com/prometheus/common/version.Version=$(cat VERSION) \
     -X github.com/prometheus/common/version.BuildDate=$(date --iso-8601=seconds)" \
     ./cmd/alertmanager
+RUN CGO_ENABLED=1 GOEXPERIMENT=boringcrypto \
+    go build \
+    -tags boring \
+    -mod=vendor \
+    -ldflags="-X github.com/prometheus/common/version.Version=$(cat VERSION) \
+    -X github.com/prometheus/common/version.BuildDate=$(date --iso-8601=seconds)" \
+    ./cmd/amtool
 
 FROM ${IMAGE_BASE}
 COPY --from=gobase /app/alertmanager /bin/alertmanager
+COPY --from=gobase /app/amtool /bin/amtool
 COPY --from=gobase --chown=nobody:nobody /etc/alertmanager /etc/alertmanager
 COPY --from=gobase --chown=nobody:nobody /alertmanager /alertmanager
 COPY LICENSE LICENSE
