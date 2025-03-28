@@ -50,23 +50,10 @@ func init() {
 // Secret is a string that must not be revealed on marshaling.
 type Secret string
 
-// MarshalYAML implements the yaml.Marshaler interface for Secret.
-func (s Secret) MarshalYAML() (interface{}, error) {
-	if s != "" {
-		return secretToken, nil
-	}
-	return nil, nil
-}
-
 // UnmarshalYAML implements the yaml.Unmarshaler interface for Secret.
 func (s *Secret) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type plain Secret
 	return unmarshal((*plain)(s))
-}
-
-// MarshalJSON implements the json.Marshaler interface for Secret.
-func (s Secret) MarshalJSON() ([]byte, error) {
-	return json.Marshal(secretToken)
 }
 
 // URL is a custom type that represents an HTTP or HTTPS URL and allows validation at configuration load time.
@@ -130,7 +117,7 @@ type SecretURL URL
 // MarshalYAML implements the yaml.Marshaler interface for SecretURL.
 func (s SecretURL) MarshalYAML() (interface{}, error) {
 	if s.URL != nil {
-		return secretToken, nil
+		return s.String(), nil
 	}
 	return nil, nil
 }
@@ -153,7 +140,7 @@ func (s *SecretURL) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // MarshalJSON implements the json.Marshaler interface for SecretURL.
 func (s SecretURL) MarshalJSON() ([]byte, error) {
-	return json.Marshal(secretToken)
+	return json.Marshal(s.String())
 }
 
 // UnmarshalJSON implements the json.Marshaler interface for SecretURL.
