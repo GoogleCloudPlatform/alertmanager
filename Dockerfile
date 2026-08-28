@@ -1,24 +1,35 @@
-FROM google-go.pkg.dev/golang:1.26.7@sha256:2f110d472e26e5c6b1c93f40a3ea6f88fe8954902cd4518d7ce99d836a158ceb AS gobase
+FROM --platform=$BUILDPLATFORM google-go.pkg.dev/golang:1.26.7@sha256:2f110d472e26e5c6b1c93f40a3ea6f88fe8954902cd4518d7ce99d836a158ceb AS gobase
+ARG TARGETOS
+ARG TARGETARCH
+ARG BUILDARCH
 WORKDIR /app
 COPY . ./
-RUN mkdir /etc/alertmanager
-RUN mkdir /alertmanager
+RUN mkdir -p /etc/alertmanager /alertmanager
 ENV GOEXPERIMENT=boringcrypto
 ENV CGO_ENABLED=1
 ENV GOFIPS140=off
 ENV GOTOOLCHAIN=local
+ENV GOWORK=off
 ENV GOARCH=${TARGETARCH}
 ENV GOOS=${TARGETOS}
 RUN if [ "${TARGETARCH}" = "arm64" ] && [ "${BUILDARCH}" != "arm64" ]; then \
-      apt install -y --no-install-recommends \
-        gcc-aarch64-linux-gnu libc6-dev-arm64-cross; \
-      CC=aarch64-linux-gnu-gcc; \
+      apt-get update && apt-get install -y --no-install-recommends \
+        gcc-aarch64-linux-gnu libc6-dev-arm64-cross && \
+      rm -rf /var/lib/apt/lists/*; \
+      export CC=aarch64-linux-gnu-gcc; \
+    elif [ "${TARGETARCH}" = "amd64" ] && [ "${BUILDARCH}" != "amd64" ]; then \
+      apt-get update && apt-get install -y --no-install-recommends \
+        gcc-x86-64-linux-gnu libc6-dev-amd64-cross && \
+      rm -rf /var/lib/apt/lists/*; \
+      export CC=x86_64-linux-gnu-gcc; \
     fi && \
     go build \
+    -mod=vendor \
     -ldflags="-X github.com/prometheus/common/version.Version=$(cat VERSION) \
     -X github.com/prometheus/common/version.BuildDate=$(date --iso-8601=seconds)" \
     ./cmd/alertmanager && \
     go build \
+    -mod=vendor \
     -ldflags="-X github.com/prometheus/common/version.Version=$(cat VERSION) \
     -X github.com/prometheus/common/version.BuildDate=$(date --iso-8601=seconds)" \
     ./cmd/amtool
