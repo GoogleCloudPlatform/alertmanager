@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM google-go.pkg.dev/golang:1.26.8@sha256:b90d223db90ab820dd1a4cf3b815b997aa9522268c36566714e544ed091fbebf AS gobase
+FROM --platform=$BUILDPLATFORM google-go.pkg.dev/golang:1.26.10@sha256:512fdac4a85972a5323695af8ebb41d2c7518b9fa1f230bd8066ee9b46d10a35 AS gobase
 ARG TARGETOS
 ARG TARGETARCH
 ARG BUILDARCH
@@ -32,7 +32,7 @@ RUN if [ "${TARGETARCH}" = "arm64" ] && [ "${BUILDARCH}" != "arm64" ]; then \
     -X github.com/prometheus/common/version.BuildDate=$(date --iso-8601=seconds)" \
     ./cmd/amtool
 
-FROM gke.gcr.io/gke-distroless/libc:gke_distroless_20260918.00_p0@sha256:fa7055965f153b4be03a5424930e3cacb08e63702205a9eda81a61b6de672330
+FROM gke.gcr.io/gke-distroless/libc:gke_distroless_20260928.00_p0@sha256:521379cbafae8f38a3cc396b9abdc569872ff9c4e26e7f6dee7b564b4fd33ab3
 COPY --from=gobase /app/alertmanager /bin/alertmanager
 COPY --from=gobase /app/amtool /bin/amtool
 COPY --from=gobase --chown=nobody:nobody /etc/alertmanager /etc/alertmanager
